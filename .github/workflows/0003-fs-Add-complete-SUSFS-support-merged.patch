@@ -1,0 +1,82 @@
+From: SUSFS Patch <>
+Subject: [PATCH] fs: Add missing SUSFS reject hunks (incremental fix)
+
+This patch ONLY adds the specific hunks that were rejected from the
+original SUSFS patch application. Apply AFTER the main SUSFS patches.
+
+---
+--- a/fs/proc/task_mmu.c
++++ b/fs/proc/task_mmu.c
+@@ -1708,10 +1708,19 @@
+ 			end = end_vaddr;
+ 		ret = mmap_read_lock_killable(mm);
+ 		if (ret)
+ 			goto out_free;
+ 		ret = walk_page_range(start_vaddr, end, &pagemap_walk);
++#ifdef CONFIG_KSU_SUSFS_SUS_MAP
++		vma = find_vma(mm, start_vaddr);
++		if (vma && vma->vm_file) {
++			struct inode *inode = file_inode(vma->vm_file);
++			if (SUSFS_IS_INODE_SUS_MAP(inode)) {
++				pm.buffer->pme = 0;
++			}
++		}
++#endif
+ 		mmap_read_unlock(mm);
+ 		start_vaddr = end;
+ 
+ 		len = min(count, PM_ENTRY_BYTES * pm.pos);
+ 		if (copy_to_user(buf, pm.buffer, len)) {
+
+--- a/fs/namespace.c
++++ b/fs/namespace.c
+@@ -24,14 +24,24 @@
+ #include <linux/proc_ns.h>
+ #include <linux/magic.h>
+ #include <linux/bootmem.h>
+ #include <linux/task_work.h>
+ #include <linux/sched/task.h>
++#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
++#include <linux/susfs_def.h>
++#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
++
+ #include <linux/fs_context.h>
+ 
+ #include "pnode.h"
+ #include "internal.h"
++#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
++extern bool susfs_is_current_ksu_domain(void);
++extern struct static_key_true susfs_is_sdcard_android_data_not_decrypted;
++#define CL_COPY_MNT_NS BIT(25) /* used by copy_mnt_ns() */
++#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
++
+ 
+ /* Maximum number of mounts in a mount namespace */
+ unsigned int sysctl_mount_max __read_mostly = 100000;
+ 
+ static unsigned int m_hash_mask __read_mostly;
+@@ -1128,10 +1138,24 @@
+ 	struct vfsmount *mnt;
+ 	int ret = 0;
+ 
+ 	if (!type)
+ 		return ERR_PTR(-EINVAL);
++
++
++#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
++	/* Bypass normal mount path for KSU domain processes */
++	if (static_branch_unlikely(&susfs_is_sdcard_android_data_not_decrypted)) {
++		if (susfs_is_current_ksu_domain()) {
++			struct mount *sus_mnt;
++			sus_mnt = susfs_alloc_non_unshare_ksu_vfsmnt(name ?: "none");
++			if (sus_mnt)
++				return &sus_mnt->mnt;
++		}
++	}
++#endif
++
+ 
+ 	fc = fs_context_for_mount(type, flags);
+ 	if (IS_ERR(fc))
+ 		return ERR_CAST(fc);
+ 
