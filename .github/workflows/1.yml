@@ -158,16 +158,6 @@ jobs:
           free -h
           swapon --show
 
-      - name: Fix broken libtinfo5 URL in build-env action
-        run: |
-          set -euo pipefail
-
-          sed -i \
-            's|launchpadlibrarian.net/580830584/libtinfo5_6.3-2_amd64.deb|archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2_amd64.deb|g' \
-            "${GITHUB_WORKSPACE}/.github/workflows/build-env/action.yml"
-
-          echo "Fixed libtinfo5 URL in build-env/action.yml"
-
       - name: Compilation environment preparation
         uses: ./.github/workflows/build-env
 
