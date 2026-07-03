@@ -21,7 +21,7 @@ env:
   ROM_TEXT: "los"
 
   # ── Kernel ──
-  KERNEL_SOURCE: "https://github.com/LineageOS/android_kernel_sony_sm8250.git"
+  KERNEL_SOURCE: "https://github.com/EsquireProud547/android_kernel_sony_sm8250.git"
   KERNEL_BRANCH: "lineage-23.2"
 
   CUSTOM_CMDS: "CLANG_TRIPLE=aarch64-linux-gnu-"
@@ -39,7 +39,7 @@ env:
 
   # ── Defconfig ──
   DEFCONFIG_SOURCE: ""
-  DEFCONFIG_NAME: "vendor/kona-perf_defconfig"
+  DEFCONFIG_NAME: "gki_defconfig"
   DEFCONFIG_ORIGIN_IMAGE: ""
   DEFCONFIG_FROM_BOOT: "false"
 
@@ -92,7 +92,7 @@ env:
   PYTHON_VERSION: "3"
   BUILD_DEBUGGER: "false"
   BUILD_OTHER_CONFIG: "true"
-  MERGE_CONFIG_FILES: "vendor/edo.config,vendor/pdx206.config,perf_overrides.config"
+  MERGE_CONFIG_FILES: "diffconfig/common_diffconfig,diffconfig/pdx206_diffconfig,perf_overrides.config"
 
   FREE_MORE_SPACE: "false"
 
