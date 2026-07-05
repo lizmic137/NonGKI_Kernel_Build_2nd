@@ -48,9 +48,6 @@ runs:
               echo "[+] Found Anykernel3 in Kernel!"
             else
               git clone "${{ env.AK3_SOURCE }}" -b "${{ env.AK3_BRANCH }}" Anykernel3 --depth=1
-              cd Anykernel3
-              git checkout dca9dc370838d919d56c1f59ec78b27a14a72c68
-              cd ../
               echo "[+] Get Anykernel3 successfully!"
             fi
           elif [[ "${{ env.PACK_METHOD }}" == "MKBOOTIMG" ]] || [ "${{ env.DEFCONFIG_FROM_BOOT }}" == "true" ]; then
