@@ -21,7 +21,7 @@ env:
   ROM_TEXT: "los"
 
   # ── Kernel ──
-  KERNEL_SOURCE: "https://github.com/EsquireProud547/android_kernel_sony_sm8250.git"
+  KERNEL_SOURCE: "https://github.com/LineageOS/android_kernel_sony_sm8250.git"
   KERNEL_BRANCH: "lineage-23.2"
 
   CUSTOM_CMDS: "CLANG_TRIPLE=aarch64-linux-gnu-"
@@ -197,6 +197,9 @@ jobs:
           CONFIG_THINLTO=y
           CONFIG_LTO_CLANG=y
           # CONFIG_LTO_NONE is not set
+          CONFIG_DEFAULT_NOOP=y
+          # CONFIG_DEBUG_INFO is not set
+          # CONFIG_CC_WERROR is not set
           EOF
 
           echo "==> perf_overrides.config:"
