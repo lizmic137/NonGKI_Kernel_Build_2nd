@@ -189,10 +189,6 @@ jobs:
           cat > arch/arm64/configs/perf_overrides.config <<'EOF'
           CONFIG_TCP_CONG_ADVANCED=y
           CONFIG_TCP_CONG_BBR=y
-          CONFIG_DEFAULT_BBR=y
-          CONFIG_DEFAULT_TCP_CONG="bbr"
-          CONFIG_NET_SCH_FQ=y
-          CONFIG_RSEQ=y
           CONFIG_LTO=y
           CONFIG_THINLTO=y
           CONFIG_LTO_CLANG=y
