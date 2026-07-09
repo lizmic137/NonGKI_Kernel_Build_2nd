@@ -189,13 +189,7 @@ jobs:
           cat > arch/arm64/configs/perf_overrides.config <<'EOF'
           CONFIG_TCP_CONG_ADVANCED=y
           CONFIG_TCP_CONG_BBR=y
-          CONFIG_LTO=y
-          CONFIG_THINLTO=y
-          CONFIG_LTO_CLANG=y
-          # CONFIG_LTO_NONE is not set
           CONFIG_DEFAULT_NOOP=y
-          # CONFIG_DEBUG_INFO is not set
-          # CONFIG_CC_WERROR is not set
           CONFIG_REKERNEL=y
           # CONFIG_REKERNEL_NETWORK is not set
           EOF
