@@ -190,8 +190,6 @@ jobs:
           CONFIG_TCP_CONG_ADVANCED=y
           CONFIG_TCP_CONG_BBR=y
           CONFIG_DEFAULT_NOOP=y
-          CONFIG_REKERNEL=y
-          # CONFIG_REKERNEL_NETWORK is not set
           EOF
 
           echo "==> perf_overrides.config:"
