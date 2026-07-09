@@ -21,8 +21,8 @@ env:
   ROM_TEXT: "los"
 
   # ── Kernel ──
-  KERNEL_SOURCE: "https://github.com/EsquireProud547/android_kernel_sony_sm8250.git"
-  KERNEL_BRANCH: "lineage-23.2"
+  KERNEL_SOURCE: "https://github.com/LineageOS/android_kernel_sony_sm8250.git"
+  KERNEL_BRANCH: "lineage-21"
 
   CUSTOM_CMDS: "CLANG_TRIPLE=aarch64-linux-gnu-"
   EXTRA_CMDS: "LLVM=1 LLVM_IAS=1 KCFLAGS='-march=armv8.2-a+crypto+dotprod -mtune=cortex-a77'"
