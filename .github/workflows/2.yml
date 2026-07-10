@@ -28,7 +28,7 @@ env:
   EXTRA_CMDS: "LLVM=1 LLVM_IAS=1 KCFLAGS='-march=armv8.2-a+crypto+dotprod -mtune=cortex-a77'"
 
   # ── Toolchain ──
-  CLANG_SOURCE: "https://github.com/ZyCromerZ/Clang/releases/download/20.0.0git-20250129-release/Clang-20.0.0git-20250129.tar.gz"
+  CLANG_SOURCE: "https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20260510-release/Clang-16.0.6-20260510.tar.gz"
   CLANG_BRANCH: ""
 
   GCC_GNU: "false"
