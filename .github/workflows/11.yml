@@ -58,7 +58,7 @@ env:
 
   PATCHES_SOURCE: ""
   PATCHES_BRANCH: ""
-  HOOK_METHOD: "manual"
+  HOOK_METHOD: "syscall"
 
   KERNEL_PATCH: "false"
   SKIP_PATCH: "false"
