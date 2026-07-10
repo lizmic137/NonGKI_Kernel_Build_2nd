@@ -18,7 +18,7 @@ env:
   # ── Device ──
   DEVICE_NAME: "pdx206"
   DEVICE_CODENAME: "pdx206"
-  ROM_TEXT: "los"
+  ROM_TEXT: "pixelos"
 
   # ── Kernel ──
   KERNEL_SOURCE: "https://github.com/PixelOS-Devices-old/kernel_sony_sm8250.git"
