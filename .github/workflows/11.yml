@@ -43,22 +43,22 @@ env:
   DEFCONFIG_ORIGIN_IMAGE: ""
   DEFCONFIG_FROM_BOOT: "false"
 
-  # ── KernelSU ──
+  # ── KernelSU (rsuntk) ──
   KERNELSU_SOURCE: ""
   KERNELSU_BRANCH: ""
   KERNELSU_METHOD: "shell"
   KERNELSU_AUTO_GET: "true"
-  KERNELSU_AUTO_FORK: "resukisu"
+  KERNELSU_AUTO_FORK: "rsuntk"
 
-  # ── SUSFS ──
-  SUSFS_ENABLE: "true"
-  SUSFS_FIXED: "true"
-  SUSFS_FOLDER_FIXED: "mix2s_aosp_a15_419"
+  # ── SUSFS (全关，rsuntk 不支持 SUSFS) ──
+  SUSFS_ENABLE: "false"
+  SUSFS_FIXED: "false"
+  SUSFS_FOLDER_FIXED: ""
   SUSFS_PATCH_FIXED: ""
 
-  PATCHES_SOURCE: "JackA1ltman/NonGKI_Kernel_Patches"
-  PATCHES_BRANCH: "mi_kernel"
-  HOOK_METHOD: "syscall"
+  PATCHES_SOURCE: ""
+  PATCHES_BRANCH: ""
+  HOOK_METHOD: "manual"
 
   KERNEL_PATCH: "false"
   SKIP_PATCH: "false"
