@@ -1,0 +1,210 @@
+name: Build Pdx206 11
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      cleanup_history:
+        description: "Clean all previous workflow runs before building"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  actions: write
+
+env:
+  # ── Device ──
+  DEVICE_NAME: "pdx206"
+  DEVICE_CODENAME: "pdx206"
+  ROM_TEXT: "los"
+
+  # ── Kernel ──
+  KERNEL_SOURCE: "https://github.com/PixelOS-Devices-old/kernel_sony_sm8250.git"
+  KERNEL_BRANCH: "fourteen"
+
+  CUSTOM_CMDS: "CLANG_TRIPLE=aarch64-linux-gnu-"
+  EXTRA_CMDS: "LLVM=1 LLVM_IAS=1 KCFLAGS='-march=armv8.2-a+crypto+dotprod -mtune=cortex-a77'"
+
+  # ── Toolchain ──
+  CLANG_SOURCE: "https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20260510-release/Clang-16.0.6-20260510.tar.gz"
+  CLANG_BRANCH: ""
+
+  GCC_GNU: "false"
+  GCC_64_SOURCE: "https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9.git"
+  GCC_64_BRANCH: "android12L-release"
+  GCC_32_SOURCE: "https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9.git"
+  GCC_32_BRANCH: "android12L-release"
+
+  # ── Defconfig ──
+  DEFCONFIG_SOURCE: ""
+  DEFCONFIG_NAME: "pdx206_defconfig"
+  DEFCONFIG_ORIGIN_IMAGE: ""
+  DEFCONFIG_FROM_BOOT: "false"
+
+  # ── KernelSU ──
+  KERNELSU_SOURCE: ""
+  KERNELSU_BRANCH: ""
+  KERNELSU_METHOD: "shell"
+  KERNELSU_AUTO_GET: "true"
+  KERNELSU_AUTO_FORK: "resukisu"
+
+  # ── SUSFS ──
+  SUSFS_ENABLE: "true"
+  SUSFS_FIXED: "true"
+  SUSFS_FOLDER_FIXED: "mix2s_aosp_a15_419"
+  SUSFS_PATCH_FIXED: ""
+
+  PATCHES_SOURCE: "JackA1ltman/NonGKI_Kernel_Patches"
+  PATCHES_BRANCH: "mi_kernel"
+  HOOK_METHOD: "syscall"
+
+  KERNEL_PATCH: "false"
+  SKIP_PATCH: "false"
+
+  # ── Features ──
+  REKERNEL_ENABLE: "false"
+  DROIDSPACES_ENABLE: "false"
+  BASEBAND_GUARD_ENABLE: "false"
+  BASEBAND_GUARD_BOOT: "false"
+
+  # ── KPM ──
+  KPM_ENABLE: "false"
+  KPM_INLINE: "false"
+  KPM_KPATCH_NEXT: "false"
+  KPM_PATCH_SOURCE: "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU_patch/refs/heads/main/kpm/patch_linux"
+
+  # ── Device Tree / DTB ──
+  NEED_DTBO: "false"
+  NEED_SAFE_DTBO: "false"
+  GENERATE_DTB: "false"
+  GENERATE_CHIP: "qcom"
+
+  # ── Pack ──
+  PACK_METHOD: "Anykernel3"
+  PACK_KMODULES: "false"
+  AK3_SOURCE: "https://github.com/EsquireProud547/AnyKernel3.git"
+  AK3_BRANCH: "master"
+  BOOT_SOURCE: ""
+
+  # ── Build ──
+  PYTHON_VERSION: "3"
+  BUILD_DEBUGGER: "false"
+  BUILD_OTHER_CONFIG: "true"
+  MERGE_CONFIG_FILES: "perf_overrides.config"
+
+  FREE_MORE_SPACE: "false"
+
+jobs:
+  cleanup-history:
+    name: Cleanup workflow history
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.cleanup_history == true }}
+
+    steps:
+      - name: Clear previous workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          echo "Deleting previous workflow runs in ${REPO}..."
+
+          gh api --paginate "repos/${REPO}/actions/runs?per_page=100" \
+            --jq '.workflow_runs[].id' |
+          grep -v "^${CURRENT_RUN_ID}$" |
+          while read -r run_id; do
+            echo "Deleting workflow run: ${run_id}"
+            gh api -X DELETE "repos/${REPO}/actions/runs/${run_id}" || true
+          done
+
+          echo "Workflow history cleanup finished."
+
+  build-kernel:
+    name: Pdx206
+    runs-on: ubuntu-latest
+    needs:
+      - cleanup-history
+    if: ${{ always() && (needs.cleanup-history.result == 'success' || needs.cleanup-history.result == 'skipped') }}
+
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_HARDLINK: "true"
+
+    steps:
+      # ── Prepare ─────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Extend swap space
+        run: |
+          set -euo pipefail
+
+          sudo swapoff -a || true
+          sudo rm -f /swapfile
+
+          sudo fallocate -l 10G /swapfile || \
+            sudo dd if=/dev/zero of=/swapfile bs=1M count=10240
+
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
+          echo "Swap status:"
+          free -h
+          swapon --show
+
+      - name: Compilation environment preparation
+        uses: ./.github/workflows/build-env
+
+      - name: Get necessary tools
+        uses: ./.github/workflows/build-ready
+
+      # ── Patch ───────────────────────────────────────────────
+      - name: Patch Kernel of SUSFS
+        uses: ./.github/workflows/patch-susfs
+
+      - name: Patch for no-kprobe
+        uses: ./.github/workflows/patch-no-kprobe
+
+      - name: Extra kernel options and performance overrides
+        run: |
+          set -euo pipefail
+
+          cd "${GITHUB_WORKSPACE}/device_kernel"
+
+          echo "Generating performance override config..."
+          mkdir -p arch/arm64/configs
+
+          cat > arch/arm64/configs/perf_overrides.config <<'EOF'
+          CONFIG_TCP_CONG_ADVANCED=y
+          CONFIG_TCP_CONG_BBR=y
+          CONFIG_DEFAULT_NOOP=y
+          EOF
+
+          echo "==> perf_overrides.config:"
+          cat arch/arm64/configs/perf_overrides.config
+
+      - name: Patch Kernel of Re:Kernel
+        uses: ./.github/workflows/patch-rekernel
+
+      - name: Patch Kernel of Droidspaces
+        uses: ./.github/workflows/patch-droidspaces
+
+      - name: Patch Kernel of Baseband Guard
+        uses: ./.github/workflows/patch-baseband-guard
+
+
+      # ── Build & Pack ────────────────────────────────────────
+      - name: Build Process
+        uses: ./.github/workflows/build-process
+
+      - name: Pack Process
+        uses: ./.github/workflows/pack-process
+
+      - name: Upload Artifacts
+        uses: ./.github/workflows/upload-files
