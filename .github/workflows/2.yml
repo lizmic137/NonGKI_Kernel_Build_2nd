@@ -197,7 +197,7 @@ jobs:
           # CONFIG_DEBUG_INFO is not set
           # CONFIG_CC_WERROR is not set
           CONFIG_REKERNEL=y
-          # CONFIG_REKERNEL_NETWORK is not set
+          CONFIG_REKERNEL_NETWORK=y
           EOF
 
           echo "==> perf_overrides.config:"
