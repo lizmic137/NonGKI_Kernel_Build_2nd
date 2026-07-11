@@ -177,12 +177,6 @@ jobs:
 
           cd "${GITHUB_WORKSPACE}/device_kernel"
 
-          echo "Applying additional SUSFS filesystem patch..."
-          wget -O 0003-fs-Add-complete-SUSFS-support-merged.patch \
-            "https://raw.githubusercontent.com/lizmic137/NonGKI_Kernel_Build_2nd/refs/heads/mainline/.github/workflows/0003-fs-Add-complete-SUSFS-support-merged.patch"
-
-          patch -p1 < 0003-fs-Add-complete-SUSFS-support-merged.patch
-
           echo "Generating performance override config..."
           mkdir -p arch/arm64/configs
 
